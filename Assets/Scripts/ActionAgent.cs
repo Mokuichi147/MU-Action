@@ -11,14 +11,20 @@ public class ActionAgent : Agent
     public GameObject enemy;
     public bool useVecObs;
     
+    Vector3 npc_pos;
+    Quaternion npc_rot;
     Rigidbody npc_rb;
     Rigidbody enemy_rb;
+    ActionAgent enemy_aa;
     EnvironmentParameters npc_reset_params;
 
     public override void Initialize()
     {
+        npc_pos = this.transform.position;
+        npc_rot = this.transform.rotation;
         npc_rb = this.GetComponent<Rigidbody>();
         enemy_rb = enemy.GetComponent<Rigidbody>();
+        enemy_aa = enemy.GetComponent<ActionAgent>();
         npc_reset_params = Academy.Instance.EnvironmentParameters;
         AgentReset();
     }
@@ -36,7 +42,7 @@ public class ActionAgent : Agent
 
     public override void OnActionReceived(ActionBuffers actionBuffers)
     {
-        var actionF = 100f * Mathf.Clamp(actionBuffers.ContinuousActions[0], -1f, 1f);
+        var actionF = 50f * Mathf.Clamp(actionBuffers.ContinuousActions[0], 0f, 1f);
         var actionR = 2f * Mathf.Clamp(actionBuffers.ContinuousActions[1], -1f, 1f);
 
         npc_rb.transform.Rotate(new Vector3(0, 1, 0), actionR);
@@ -52,7 +58,7 @@ public class ActionAgent : Agent
         }
         else
         {
-            SetReward(-0.1f);
+            SetReward(0.1f);
         }
     }
 
@@ -76,10 +82,23 @@ public class ActionAgent : Agent
         npc_rb.mass = npc_reset_params.GetWithDefault("mass", 1.0f);
         var scale = npc_reset_params.GetWithDefault("scale", 1.0f);
         this.transform.localScale =  new Vector3(scale, scale, scale);
+        this.transform.position = npc_pos;
+        this.transform.rotation = npc_rot;
     }
 
     public void AgentReset()
     {
         AgentSet();
+    }
+
+    void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("wall"))
+        {
+            SetReward(-1);
+            enemy_aa.SetReward(1);
+            EndEpisode();
+            enemy_aa.EndEpisode();
+        }
     }
 }
