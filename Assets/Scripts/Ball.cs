@@ -55,18 +55,26 @@ public class Ball : MonoBehaviour
         Reset();
     }
 
+    void NoWin()
+    {
+        player_a.SetReward(-1);
+        player_b.SetReward(-1);
+        Reset();
+    }
+
     void Win(string cgo_name)
     {
+        Debug.Log("win:" + cgo_name + " pre:" + pre_action);
         switch (pre_action)
         {
             case "serve":
                 WinB();
                 break;
-            case "Agent_A":
+            case "Rubber_A":
             case "Table_A":
                 WinB();
                 break;
-            case "Agent_B":
+            case "Rubber_B":
             case "Table_B":
                 WinA();
                 break;
@@ -75,17 +83,21 @@ public class Ball : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (pre_pos == this.transform.position.y)
+        var y_pos = this.transform.position.y;
+        if (pre_pos == y_pos)
             action_count++;
         else
         {
             action_count = 0;
-            pre_pos = this.transform.position.y;
+            pre_pos = y_pos;
         }
-        if (action_count > 200)
+        if (action_count > 20)
         {
-            WinB();
-            Debug.Log("hello");
+            NoWin();
+        }
+        else if (y_pos <= 0f)
+        {
+            NoWin();
         }
     }
 
@@ -96,45 +108,45 @@ public class Ball : MonoBehaviour
         {
             Win("ground");
         }
-        else if (cgo.CompareTag("Racket"))
+        else if (cgo.gameObject.name == "Rubber_A")
         {
-            if (next_action == cgo.gameObject.name)
+            if (serve)
             {
-                if (pre_action == next_action)
-                {
-                    Win(cgo.gameObject.name);
-                }
-                pre_action = next_action;
-                if (serve)
-                {
-                    next_action = "Table_B";
-                    serve = false;
-                }
-                else
-                {
-                    next_action = cgo.gameObject.name == "Agent_A" ? "Table_B" : "Table_A";
-                }
+                next_action = "Table_B";
+                pre_action = "Rubber_A";
             }
             else
             {
-                Win(cgo.gameObject.name);
+                next_action = "Table_A";
+                pre_action = "Rubber_A";
             }
         }
-        else if (cgo.CompareTag("Table"))
+        else if (cgo.gameObject.name == "Rubber_B")
         {
-            if (pre_action == next_action)
-                {
-                    Win(cgo.gameObject.name);
-                }
-            if (next_action == cgo.gameObject.name)
+            next_action = "Table_B";
+            pre_action = "Rubber_B";
+        }
+        else if (cgo.gameObject.name == "Table_A")
+        {
+            next_action = "Rubber_B";
+            pre_action = "Table_A";
+        }
+        else if (cgo.gameObject.name == "Table_B")
+        {
+            if (serve)
             {
-                pre_action = next_action;
-                next_action = cgo.gameObject.name == "Table_A" ? "Agent_A" : "Agent_B";
+                next_action = "Table_A";
+                serve = false;
             }
             else
             {
-                Win(cgo.gameObject.name);
+                next_action = "Rubber_A";
+                pre_action = "Table_B";
             }
+        }
+        else
+        {
+            Win(cgo.gameObject.name);
         }
     }
 }

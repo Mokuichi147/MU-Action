@@ -38,7 +38,7 @@ public class TableTennisAgent : Agent
 
     public override void OnActionReceived(ActionBuffers actionBuffers)
     {
-        var scale = 0.005f;
+        var scale = 0.02f;
         var continuousActions = actionBuffers.ContinuousActions;
         var moveX = Mathf.Clamp(continuousActions[0], -1f, 1f) * scale;
         var moveZ = Mathf.Clamp(continuousActions[1], -1f, 1f) * scale;
