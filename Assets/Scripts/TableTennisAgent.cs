@@ -8,6 +8,7 @@ using Random = UnityEngine.Random;
 
 public class TableTennisAgent : Agent
 {
+    public GameObject ball;
     public GameObject opponent;
     public bool useVecObs;
     
@@ -30,41 +31,57 @@ public class TableTennisAgent : Agent
         if (useVecObs)
         {
             sensor.AddObservation(this.transform.position);
+            sensor.AddObservation(ball.transform.position - this.transform.position);
             sensor.AddObservation(opponent.transform.position - this.transform.position);
         }
     }
 
     public override void OnActionReceived(ActionBuffers actionBuffers)
     {
-        var actionF = 50f * Mathf.Clamp(actionBuffers.ContinuousActions[0], 0f, 1f);
-        var actionR = 2f * Mathf.Clamp(actionBuffers.ContinuousActions[1], -1f, 1f);
-
-        if (this.transform.position.y < 0f)
+        var scale = 0.005f;
+        var continuousActions = actionBuffers.ContinuousActions;
+        var moveX = Mathf.Clamp(continuousActions[0], -1f, 1f) * scale;
+        var moveZ = Mathf.Clamp(continuousActions[1], -1f, 1f) * scale;
+        var moveY = Mathf.Clamp(continuousActions[2], -1f, 1f) * scale;
+        
+        var new_pos = this.transform.position + new Vector3(moveX, moveY, moveZ);
+        var new_pos_sa = new_pos - this.transform.parent.gameObject.transform.position;
+        if (new_pos_sa.z < 1.5 && new_pos_sa.y < 0.85 && Mathf.Abs(new_pos_sa.x) < 1f)
         {
+            new_pos -= new Vector3(moveX, moveY, moveZ);
             SetReward(-1f);
         }
-        else if (opponent.transform.position.y < 0f)
+        else if (new_pos_sa.z < 0.15)
         {
-            SetReward(1f);
+            new_pos.z -= moveZ;
+            SetReward(-0.5f);
         }
         else
         {
             SetReward(0.1f);
         }
+        this.transform.position = new_pos;
     }
 
     public override void OnEpisodeBegin()
     {
-        this.transform.rotation = new Quaternion(0f, 0f, 0f, 0f);
-        this.transform.Rotate(new Vector3(0, 1, 0), Random.Range(-10f, 10f));
+        //this.transform.rotation = new Quaternion(0f, 0f, 0f, 0f);
+        //this.transform.Rotate(new Vector3(0, 1, 0), Random.Range(-10f, 10f));
         AgentReset();
     }
 
     public override void Heuristic(in ActionBuffers actionsOut)
     {
         var continuousActionsOut = actionsOut.ContinuousActions;
-        continuousActionsOut[0] = -Input.GetAxis("Horizontal");
-        continuousActionsOut[1] = Input.GetAxis("Vertical");
+        var key_w = Input.GetKey(KeyCode.W) ? 1f : 0f;
+        var key_s = Input.GetKey(KeyCode.S) ? -1f : 0f;
+        continuousActionsOut[0] = key_w + key_s;
+        var key_a = Input.GetKey(KeyCode.A) ? 1f : 0f;
+        var key_d = Input.GetKey(KeyCode.D) ? -1f : 0f;
+        continuousActionsOut[1] = key_a + key_d;
+        var key_e = Input.GetKey(KeyCode.E) ? 1f : 0f;
+        var key_q = Input.GetKey(KeyCode.Q) ? -1f : 0f;
+        continuousActionsOut[2] = key_e + key_q;
     }
 
     public void AgentSet()

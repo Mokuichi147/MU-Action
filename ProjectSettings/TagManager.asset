@@ -28,6 +28,9 @@ TagManager:
   - badFood
   - food
   - Ground
+  - Table
+  - Racket
+  - Net
   layers:
   - Default
   - TransparentFX
