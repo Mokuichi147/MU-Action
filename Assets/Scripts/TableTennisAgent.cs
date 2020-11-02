@@ -38,11 +38,12 @@ public class TableTennisAgent : Agent
 
     public override void OnActionReceived(ActionBuffers actionBuffers)
     {
-        var scale = 0.02f;
+        var scale = 0.04f;
         var continuousActions = actionBuffers.ContinuousActions;
         var moveX = Mathf.Clamp(continuousActions[0], -1f, 1f) * scale;
         var moveZ = Mathf.Clamp(continuousActions[1], -1f, 1f) * scale;
-        var moveY = Mathf.Clamp(continuousActions[2], -1f, 1f) * scale;
+        //var moveY = Mathf.Clamp(continuousActions[2], -1f, 1f) * scale;
+        var moveY = 0f;
         
         var new_pos = this.transform.position + new Vector3(moveX, moveY, moveZ);
         var new_pos_sa = new_pos - this.transform.parent.gameObject.transform.position;
@@ -79,9 +80,9 @@ public class TableTennisAgent : Agent
         var key_a = Input.GetKey(KeyCode.A) ? 1f : 0f;
         var key_d = Input.GetKey(KeyCode.D) ? -1f : 0f;
         continuousActionsOut[1] = key_a + key_d;
-        var key_e = Input.GetKey(KeyCode.E) ? 1f : 0f;
-        var key_q = Input.GetKey(KeyCode.Q) ? -1f : 0f;
-        continuousActionsOut[2] = key_e + key_q;
+        //var key_e = Input.GetKey(KeyCode.E) ? 1f : 0f;
+        //var key_q = Input.GetKey(KeyCode.Q) ? -1f : 0f;
+        //continuousActionsOut[2] = key_e + key_q;
     }
 
     public void AgentSet()

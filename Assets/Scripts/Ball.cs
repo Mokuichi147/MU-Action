@@ -64,7 +64,6 @@ public class Ball : MonoBehaviour
 
     void Win(string cgo_name)
     {
-        Debug.Log("win:" + cgo_name + " pre:" + pre_action);
         switch (pre_action)
         {
             case "serve":
@@ -112,6 +111,7 @@ public class Ball : MonoBehaviour
         {
             if (serve)
             {
+                player_a.SetReward(0.2f);
                 next_action = "Table_B";
                 pre_action = "Rubber_A";
             }
@@ -128,6 +128,7 @@ public class Ball : MonoBehaviour
         }
         else if (cgo.gameObject.name == "Table_A")
         {
+            player_a.SetReward(0.6f);
             next_action = "Rubber_B";
             pre_action = "Table_A";
         }
@@ -135,11 +136,13 @@ public class Ball : MonoBehaviour
         {
             if (serve)
             {
+                player_a.SetReward(0.4f);
                 next_action = "Table_A";
                 serve = false;
             }
             else
             {
+                player_b.SetReward(0.6f);
                 next_action = "Rubber_A";
                 pre_action = "Table_B";
             }
